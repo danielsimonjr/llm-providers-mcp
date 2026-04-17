@@ -28,8 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT license.
 - Contributor Covenant 2.1 code of conduct, CONTRIBUTING guide, SECURITY
   policy.
-- GitHub Actions CI running `ruff` and `pytest` unit tests on Linux and
-  Windows across Python 3.10–3.13.
+- GitHub Actions CI workflow prepared in `docs/ci.yml.example` but not
+  activated in this release — activating it requires a `gh auth refresh
+  -s workflow` token upgrade. Move to `.github/workflows/ci.yml` when
+  ready.
 - Issue and pull-request templates.
 
 [Unreleased]: https://github.com/danielsimonjr/llm-providers-mcp/compare/v0.1.0...HEAD
