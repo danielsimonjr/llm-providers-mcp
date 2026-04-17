@@ -21,12 +21,10 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-      - name: Install ruff
-        run: uv pip install --system ruff
       - name: ruff check
-        run: ruff check .
+        run: uvx ruff check .
       - name: ruff format --check
-        run: ruff format --check .
+        run: uvx ruff format --check .
 
   test:
     name: pytest (${{ matrix.os }}, Python ${{ matrix.python-version }})
