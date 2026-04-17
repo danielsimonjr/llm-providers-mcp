@@ -64,6 +64,24 @@ claude mcp list   # should show both ✓ Connected
 Restart Claude Code so it picks up the new servers. API keys are inherited
 from your shell environment — not written into any config file.
 
+## Slash commands
+
+The repo ships two slash commands in `.claude/commands/` for quick one-shot
+asks. After registering the MCP servers, either commit them per-project or
+copy into `~/.claude/commands/` for global availability:
+
+```bash
+cp .claude/commands/*.md ~/.claude/commands/
+```
+
+| Command | What it does | Model |
+|---|---|---|
+| `/askGemini <question>` | Routes your prompt to `gemini_quick_query` and shows the answer | `gemini-2.5-flash` |
+| `/askOpenAI <question>` | Routes your prompt to `openai_quick_query` and shows the answer | `gpt-4o-mini` |
+
+Each command includes a single-line model-name footer under the answer so you
+know which provider and model responded.
+
 ## Verify standalone
 
 Before registering with Claude Code, you can drive each server through the

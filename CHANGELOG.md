@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Slash commands `/askGemini` and `/askOpenAI` in `.claude/commands/` for
+  one-shot queries against the quick-model tool of each provider.
+
 ## [0.1.0] - 2026-04-17
 
 ### Added

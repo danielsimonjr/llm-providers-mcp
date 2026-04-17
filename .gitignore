@@ -12,5 +12,5 @@ build/
 
 # Claude Code session state
 .remember/
-.claude/
+.claude/settings.local.json
 
