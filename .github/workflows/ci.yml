@@ -1,14 +1,5 @@
-# GitHub Actions workflow — deferred from v0.1.0 release.
-#
-# To activate:
-#   1. Run:  gh auth refresh -h github.com -s workflow
-#      (adds the `workflow` OAuth scope — GitHub requires it to push
-#       files under .github/workflows/ via an OAuth app)
-#   2. Move this file: git mv docs/ci.yml.example .github/workflows/ci.yml
-#   3. Commit and push.
-#
-# The workflow runs ruff + pytest (unit tests only, integration skipped)
-# on Linux and Windows, Python 3.10 through 3.13.
+# Runs ruff + pytest (unit tests only, integration skipped) on Linux
+# and Windows across Python 3.10-3.13.
 
 name: CI
 

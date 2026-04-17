@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `result.usage`. Output now includes `input_tokens`, `output_tokens`,
   `total_tokens`, `requests`, and optionally `reasoning_tokens` /
   `cached_tokens` when the SDK reports them.
+- GitHub Actions CI workflow activated at `.github/workflows/ci.yml`
+  (moved from the staging location at `docs/ci.yml.example`). Runs on
+  every push and PR to `main`.
 
 ## [0.1.0] - 2026-04-17
 
