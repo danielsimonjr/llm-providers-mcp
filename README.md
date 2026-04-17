@@ -76,8 +76,10 @@ cp .claude/commands/*.md ~/.claude/commands/
 
 | Command | What it does | Model |
 |---|---|---|
-| `/askGemini <question>` | Routes your prompt to `gemini_quick_query` and shows the answer | `gemini-2.5-flash` |
-| `/askOpenAI <question>` | Routes your prompt to `openai_quick_query` and shows the answer | `gpt-4o-mini` |
+| `/askGemini <question>` | Fast one-shot via `gemini_quick_query` | `gemini-2.5-flash` |
+| `/askGeminiPro <question>` | Deep reasoning via `gemini_reasoning_query` | `gemini-2.5-pro` |
+| `/askOpenAI <question>` | Fast one-shot via `openai_quick_query` | `gpt-4o-mini` |
+| `/askOpenAIPro <question>` | Deep reasoning via `openai_reasoning_query` | `o3-mini` |
 
 Each command includes a single-line model-name footer under the answer so you
 know which provider and model responded.

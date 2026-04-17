@@ -44,12 +44,30 @@ def build_generalist_agent() -> Agent:
 
 
 async def run_agent(agent: Agent, prompt: str) -> tuple[str, dict]:
-    """Run an agent and return (final_output, usage_dict)."""
+    """Run an agent and return (final_output, usage_dict).
+
+    openai-agents exposes token usage at result.context_wrapper.usage as a
+    Usage dataclass. We normalize it to the same shape our Gemini client
+    returns so the MCP tool response stays consistent across providers.
+    """
     result = await Runner.run(agent, prompt)
-    usage = {}
+    usage: dict = {}
     try:
-        # The SDK exposes token usage on the result context.
-        usage = dict(result.usage) if hasattr(result, "usage") else {}
+        raw = result.context_wrapper.usage
+        usage = {
+            "input_tokens": raw.input_tokens,
+            "output_tokens": raw.output_tokens,
+            "total_tokens": raw.total_tokens,
+            "requests": raw.requests,
+        }
+        reasoning = getattr(raw.output_tokens_details, "reasoning_tokens", 0)
+        if reasoning:
+            usage["reasoning_tokens"] = reasoning
+        cached = getattr(raw.input_tokens_details, "cached_tokens", 0)
+        if cached:
+            usage["cached_tokens"] = cached
     except Exception:
+        # Defensive: if the SDK reshapes this in a future version, degrade
+        # gracefully rather than crash the tool call.
         usage = {}
     return (result.final_output or "", usage)

@@ -9,8 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Slash commands `/askGemini` and `/askOpenAI` in `.claude/commands/` for
-  one-shot queries against the quick-model tool of each provider.
+- Slash commands `/askGemini`, `/askGeminiPro`, `/askOpenAI`, and
+  `/askOpenAIPro` in `.claude/commands/`. The base commands invoke the
+  quick-model tools; the `*Pro` variants invoke the reasoning-model tools.
+  Each command's response includes a model-name footer.
+
+### Changed
+
+- `servers/openai_mcp/agent.py::run_agent` now extracts token usage from
+  `result.context_wrapper.usage` (the correct location in
+  `openai-agents` 0.14.1) instead of looking for a top-level
+  `result.usage`. Output now includes `input_tokens`, `output_tokens`,
+  `total_tokens`, `requests`, and optionally `reasoning_tokens` /
+  `cached_tokens` when the SDK reports them.
 
 ## [0.1.0] - 2026-04-17
 
