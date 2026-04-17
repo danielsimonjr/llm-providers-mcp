@@ -1,0 +1,39 @@
+[project]
+name = "llm-providers-mcp"
+version = "0.1.0"
+description = "Local MCP servers wrapping OpenAI, Gemini, and other LLM providers."
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.2.0",
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+    "anyio>=4.4",
+    # Provider SDKs are optional so unused servers don't force installs.
+]
+
+[project.optional-dependencies]
+openai = ["openai-agents>=0.14", "openai>=1.50"]
+gemini = ["google-genai>=1.0"]
+anthropic = ["claude-agent-sdk>=0.2.111"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.24", "ruff>=0.7"]
+
+[project.scripts]
+mcp-openai = "servers.openai_mcp.server:main"
+mcp-gemini = "servers.gemini_mcp.server:main"
+
+[tool.setuptools.packages.find]
+include = ["shared*", "servers*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+markers = [
+    "integration: tests that hit live provider APIs (cost money, need keys)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]  # line length handled by formatter
