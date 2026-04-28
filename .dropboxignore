@@ -1,0 +1,20 @@
+# Git internals — keeps Dropbox out of .git so git operations don't get blocked
+.git/
+
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Claude Code session state
+.remember/
+.claude/settings.local.json
+
+
