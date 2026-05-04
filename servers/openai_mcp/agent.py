@@ -1,13 +1,25 @@
-"""OpenAI agent construction. Separated from the MCP layer for testability."""
+"""OpenAI agent construction. Separated from the MCP layer for testability.
+
+`agents` (openai-agents SDK) import is deferred to call time — at module top
+it costs ~3s on this machine, which exceeds the MCP plugin host's startup-
+handshake budget (causes `× failed` in /mcp). Lazy-loading lets the server
+register its tool surface in <500ms; the SDK only loads on the first tool
+call.
+"""
 
 from __future__ import annotations
 
-from agents import Agent, Runner  # from `openai-agents`
+from typing import TYPE_CHECKING
 
 from shared.secrets import env_or
 
+if TYPE_CHECKING:
+    # type-only import — never executed at runtime
+    from agents import Agent
 
-def build_quick_agent() -> Agent:
+
+def build_quick_agent() -> "Agent":
+    from agents import Agent  # lazy: see module docstring
     return Agent(
         name="OpenAI Quick",
         model=env_or("OPENAI_QUICK_MODEL", "gpt-4o-mini"),
@@ -18,7 +30,8 @@ def build_quick_agent() -> Agent:
     )
 
 
-def build_reasoning_agent() -> Agent:
+def build_reasoning_agent() -> "Agent":
+    from agents import Agent  # lazy: see module docstring
     return Agent(
         name="OpenAI Reasoning",
         model=env_or("OPENAI_REASONING_MODEL", "o3-mini"),
@@ -29,8 +42,9 @@ def build_reasoning_agent() -> Agent:
     )
 
 
-def build_generalist_agent() -> Agent:
+def build_generalist_agent() -> "Agent":
     """The 'do a whole task' agent. Can be extended with tools."""
+    from agents import Agent  # lazy: see module docstring
     return Agent(
         name="OpenAI Generalist",
         model=env_or("OPENAI_REASONING_MODEL", "o3-mini"),
@@ -43,13 +57,14 @@ def build_generalist_agent() -> Agent:
     )
 
 
-async def run_agent(agent: Agent, prompt: str) -> tuple[str, dict]:
+async def run_agent(agent: "Agent", prompt: str) -> tuple[str, dict]:
     """Run an agent and return (final_output, usage_dict).
 
     openai-agents exposes token usage at result.context_wrapper.usage as a
     Usage dataclass. We normalize it to the same shape our Gemini client
     returns so the MCP tool response stays consistent across providers.
     """
+    from agents import Runner  # lazy: see module docstring
     result = await Runner.run(agent, prompt)
     usage: dict = {}
     try:

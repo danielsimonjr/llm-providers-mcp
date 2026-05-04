@@ -1,20 +1,30 @@
-"""Thin Gemini client built on the unified google-genai SDK."""
+"""Thin Gemini client built on the unified google-genai SDK.
+
+`google.genai` import is deferred to call time — at module top it costs
+~3s on this machine, which exceeds the MCP plugin host's startup-handshake
+budget (causes `× failed` in /mcp). Lazy-loading lets the server register
+its tool surface in <500ms; the SDK only loads on the first tool call.
+"""
 
 from __future__ import annotations
 
-from google import genai
-from google.genai import types
+from typing import TYPE_CHECKING
 
 from shared.secrets import require_env
 
+if TYPE_CHECKING:
+    # type-only import — never executed at runtime
+    from google import genai
 
-def build_client() -> genai.Client:
+
+def build_client() -> "genai.Client":
     # google-genai reads GEMINI_API_KEY (or GOOGLE_API_KEY) from the env
     # automatically, but we assert presence first so failure is clear.
     require_env(
         "GEMINI_API_KEY",
         hint="Get one from https://aistudio.google.com/apikey and `export` it.",
     )
+    from google import genai  # lazy: see module docstring
     return genai.Client()
 
 
@@ -25,6 +35,7 @@ async def generate(
     max_output_tokens: int = 4096,
     system_instruction: str | None = None,
 ) -> tuple[str, dict]:
+    from google.genai import types  # lazy: see module docstring
     client = build_client()
     config = types.GenerateContentConfig(
         max_output_tokens=max_output_tokens,
