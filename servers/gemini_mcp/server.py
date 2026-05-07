@@ -28,9 +28,14 @@ async def gemini_quick_query(
     Use for: short factual lookups, creative phrasing, quick synthesis.
     """
     try:
+        # Flash supports `thinking_budget=0` to disable thinking entirely;
+        # quick queries don't need reasoning overhead.
         text, usage = await generate(
             prompt,
             model=QUICK_MODEL,
+            max_output_tokens=8192,
+            thinking_budget=0,
+            temperature=0.2,
             system_instruction=("You are a fast, direct assistant. Answer concisely. No preamble."),
         )
     except Exception as exc:
@@ -48,9 +53,17 @@ async def gemini_reasoning_query(
     distinct reasoning style is a useful second opinion to Claude's.
     """
     try:
+        # Pro CANNOT disable thinking (per Gemini docs) but the budget can
+        # be capped. With the prior default (max_output_tokens=4096, no
+        # thinking_config) Pro silently returned empty text because dynamic
+        # thinking consumed the entire budget. Cap thinking at 8192 and
+        # raise output cap to 32768 so output has guaranteed headroom.
         text, usage = await generate(
             prompt,
             model=REASONING_MODEL,
+            max_output_tokens=32768,
+            thinking_budget=8192,
+            temperature=0.2,
             system_instruction=("You are a careful reasoner. Prefer correctness over speed."),
         )
     except Exception as exc:

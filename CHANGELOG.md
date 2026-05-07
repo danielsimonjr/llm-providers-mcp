@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `/askOpenAIPro` in `.claude/commands/`. The base commands invoke the
   quick-model tools; the `*Pro` variants invoke the reasoning-model tools.
   Each command's response includes a model-name footer.
+- `servers/gemini_mcp/client.py::_build_config` — extracted helper that
+  constructs `GenerateContentConfig` with `thinking_config` and
+  `temperature` set. Unit-tested via `tests/test_gemini_client.py`
+  (6 tests, no network).
+- `generate()` now also surfaces `thoughts_tokens` and `finish_reason`
+  in the usage dict for debugging silent-truncation cases.
+
+### Fixed
+
+- **Gemini empty-response / silent-truncation bug.** With no
+  `thinking_config` set and `max_output_tokens=4096`, Gemini 2.5 Pro
+  silently returned `response.text == ""` because dynamic thinking
+  consumed the entire output budget (finish_reason=MAX_TOKENS). Per
+  the official [Gemini thinking docs](https://ai.google.dev/gemini-api/docs/thinking),
+  Pro cannot disable thinking but accepts a budget cap; Flash supports
+  `thinking_budget=0` to disable entirely. `gemini_quick_query` (Flash)
+  now sets `thinking_budget=0, max_output_tokens=8192`;
+  `gemini_reasoning_query` (Pro) sets `thinking_budget=8192,
+  max_output_tokens=32768`. Both also set `temperature=0.2` for
+  deterministic technical reasoning. References:
+  [googleapis/python-genai#811](https://github.com/googleapis/python-genai/issues/811),
+  [googleapis/python-genai#782](https://github.com/googleapis/python-genai/issues/782).
 
 ### Changed
 
