@@ -2,14 +2,53 @@
 
 from __future__ import annotations
 
+import os
+import sys
+import time
+from pathlib import Path
 from typing import Annotated
+
+# --- Startup heartbeat (instrumentation) ----------------------------
+#
+# The MCP stdio transport eats stderr by default, hiding crashes that
+# happen between process spawn and the FastMCP handshake. This block
+# writes a one-line heartbeat to ~/.claude/llm-gemini-startup.log
+# AT IMPORT TIME so we can tell — out-of-band — whether the host
+# actually spawned us. If the file timestamp doesn't advance after a
+# /reload-plugins, the host never spawned us (vs spawn + die early).
+#
+# Best-effort: a write failure here must not block the server. Any
+# exception is swallowed so we don't introduce a new failure mode.
+try:
+    _log_path = Path.home() / ".claude" / "llm-gemini-startup.log"
+    _log_path.parent.mkdir(parents=True, exist_ok=True)
+    with _log_path.open("a", encoding="utf-8") as _f:
+        _f.write(
+            f"{time.strftime('%Y-%m-%dT%H:%M:%S')} "
+            f"pid={os.getpid()} "
+            f"key_present={'GEMINI_API_KEY' in os.environ} "
+            f"python={sys.version_info[:3]}\n"
+        )
+except Exception:
+    pass
+# --- End heartbeat ---------------------------------------------------
 
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 
 from shared.errors import classify
 from shared.formatting import ok
-from shared.secrets import env_or
+from shared.secrets import env_or, require_env
+
+# Asserts the key exists at import time — fail fast, not at first tool
+# call. Mirrors the OpenAI server's pattern (servers/openai_mcp/server.py).
+# Without this, a missing GEMINI_API_KEY produces a silent late failure
+# inside `client.generate()`, after the FastMCP handshake has already
+# advertised the tools but they all error on first use.
+require_env(
+    "GEMINI_API_KEY",
+    hint="Get one from https://aistudio.google.com/apikey and `export` it.",
+)
 
 from .client import generate
 
