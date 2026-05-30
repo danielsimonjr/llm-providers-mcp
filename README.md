@@ -5,11 +5,11 @@ through each provider's own official Agent SDK.
 
 [![CI](https://github.com/danielsimonjr/llm-providers-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/danielsimonjr/llm-providers-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python: 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
+[![Node: >=24](https://img.shields.io/badge/node-%3E%3D24-blue.svg)](package.json)
 
 No third-party plugin, no telemetry, no postinstall scripts. Every line is
-yours to audit. Built against the MCP Python SDK and the official provider
-SDKs (`openai-agents`, `google-genai`).
+yours to audit. Built against the MCP TypeScript SDK and the official provider
+SDKs (`@openai/agents`, `@google/genai`).
 
 ## Tools exposed
 
@@ -24,26 +24,18 @@ SDKs (`openai-agents`, `google-genai`).
 
 ## Install
 
-Requires Python ≥3.10 and [`uv`](https://github.com/astral-sh/uv) (or plain `pip`).
+Requires Node >=24.
 
 ```bash
 git clone https://github.com/danielsimonjr/llm-providers-mcp.git
 cd llm-providers-mcp
-uv venv --python 3.13
-source .venv/Scripts/activate    # Windows Git Bash
-# or: .venv\Scripts\Activate.ps1  (PowerShell)
-uv pip install -e ".[openai,gemini,dev]"
+npm install
+npm run build
 ```
 
 ## Configure keys
 
 Keys live in environment variables only — never on disk inside this repo.
-
-```bash
-# Linux/macOS/Git Bash
-export OPENAI_API_KEY='sk-...'
-export GEMINI_API_KEY='AIza...'
-```
 
 ```powershell
 # Windows PowerShell (persistent, per-user)
@@ -51,19 +43,19 @@ export GEMINI_API_KEY='AIza...'
 [Environment]::SetEnvironmentVariable("GEMINI_API_KEY", "AIza...", "User")
 ```
 
-See `.env.example` for the full list of supported env vars (model overrides,
-timeouts).
+Optional model overrides: `GEMINI_QUICK_MODEL`, `GEMINI_REASONING_MODEL`,
+`OPENAI_QUICK_MODEL`, `OPENAI_REASONING_MODEL`.
 
 ## Register with Claude Code
 
 ```bash
-claude mcp add -s user llm-openai -- /abs/path/to/.venv/Scripts/python.exe -m servers.openai_mcp.server
-claude mcp add -s user llm-gemini -- /abs/path/to/.venv/Scripts/python.exe -m servers.gemini_mcp.server
-claude mcp list   # should show both ✓ Connected
+claude mcp add -s user llm-openai -- node /abs/path/to/dist/openai/index.js
+claude mcp add -s user llm-gemini -- node /abs/path/to/dist/gemini/index.js
+claude mcp list
 ```
 
-Restart Claude Code so it picks up the new servers. API keys are inherited
-from your shell environment — not written into any config file.
+API keys are inherited from your shell environment — not written into any
+config file.
 
 ## Slash commands
 
@@ -91,25 +83,22 @@ Before registering with Claude Code, you can drive each server through the
 MCP Inspector browser UI:
 
 ```bash
-npx @modelcontextprotocol/inspector ./.venv/Scripts/python.exe -m servers.openai_mcp.server
+npx @modelcontextprotocol/inspector node dist/gemini/index.js
 ```
 
 ## Development
 
 ```bash
-uv pip install -e ".[dev]"
-pytest                      # unit tests (no network)
-pytest -m integration       # integration tests (requires keys, spends $)
-ruff check .
-ruff format .
+npm test          # vitest unit + smoke tests (no network)
+npm run typecheck
+npm run build
 ```
 
 ## How to add a provider
 
-See [`servers/README.md`](servers/README.md). The one-sentence version: if the
-new provider is OpenAI-compatible, extend `servers/openai_mcp` with a
-`base_url` override; otherwise give it its own `servers/<provider>_mcp/`
-directory following the Gemini pattern.
+The one-sentence version: if the new provider is OpenAI-compatible, extend
+`src/openai/` with a `baseURL` override; otherwise give it its own
+`src/<provider>/` directory following the Gemini pattern.
 
 ## Background
 
