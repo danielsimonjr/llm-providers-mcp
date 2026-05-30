@@ -89,7 +89,12 @@ export function makeHandlers(deps?: { generate?: typeof realGenerate }): Record<
         parts.push({ inlineData: { mimeType, data } });
       }
       const response = await client.models.generateContent({ model: QUICK_MODEL, contents: parts as any });
-      const text = response.text ?? "";
+      let text = "";
+      try {
+        text = response.text ?? "";
+      } catch {
+        text = "";
+      }
       return JSON.stringify(ok(text, { provider: "gemini", model: QUICK_MODEL }));
     } catch (err) {
       return JSON.stringify(classify("gemini", err).toToolResponse());

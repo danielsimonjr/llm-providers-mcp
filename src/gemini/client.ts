@@ -55,18 +55,25 @@ export async function generate(
   });
   const usage: Record<string, unknown> = {};
   try {
-    const md = (response as any).usageMetadata;
+    const md = response.usageMetadata;
     if (md) {
       usage.input_tokens = md.promptTokenCount;
       usage.output_tokens = md.candidatesTokenCount;
       usage.total_tokens = md.totalTokenCount;
       if (md.thoughtsTokenCount != null) usage.thoughts_tokens = md.thoughtsTokenCount;
     }
-    const cands = (response as any).candidates;
+    const cands = response.candidates;
     if (cands && cands[0]?.finishReason != null) usage.finish_reason = String(cands[0].finishReason);
   } catch {
     // best-effort
   }
-  const text = response.text ?? "";
+  let text = "";
+  try {
+    text = response.text ?? "";
+  } catch {
+    // .text is a getter in @google/genai; tolerate odd response shapes
+    // the way the Python original did (response.text or "").
+    text = "";
+  }
   return [text, usage];
 }
