@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-05-30
+
+### Changed
+- **Rewrote both MCP servers (llm-gemini, llm-openai) from Python to TypeScript.**
+  Runtime is now Node >=24 via `dist/gemini/index.js` and `dist/openai/index.js`;
+  no Python venv or editable install required. Tool names, input schemas, system
+  prompts/instructions, model defaults, token/thinking budgets, the
+  `OPENAI_REASONING_MODEL` override, and the `{ok,...,data}` / `{ok:false,error}`
+  response shapes are preserved.
+- SDKs: `@google/genai` (Gemini) and `@openai/agents` (OpenAI), replacing the
+  Python `google-genai` and `openai-agents`.
+- MCP wiring uses the low-level `@modelcontextprotocol/sdk` `Server` with a
+  `TOOLS`/`HANDLERS` pattern (matching the sibling gmail-mcp / time-mcp repos).
+
+### Known limitations
+- `openai_*` tool responses currently return an empty `usage` object:
+  `@openai/agents@0.1.11` does not expose token usage at the probed
+  `result.state.context.usage` path. Responses are otherwise correct; usage is
+  best-effort metadata. Gemini usage is unaffected. (Tracked for a follow-up.)
+
+### Removed
+- Python implementation (`servers/`, `shared/`, `pyproject.toml`, `uv.lock`).
+
 ## [Unreleased]
 
 ### Added
@@ -75,5 +98,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ready.
 - Issue and pull-request templates.
 
-[Unreleased]: https://github.com/danielsimonjr/llm-providers-mcp/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/danielsimonjr/llm-providers-mcp/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/danielsimonjr/llm-providers-mcp/compare/v0.1.0...v2.0.0
 [0.1.0]: https://github.com/danielsimonjr/llm-providers-mcp/releases/tag/v0.1.0
