@@ -5,6 +5,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprot
 import { requireEnv } from "../shared/secrets.js";
 import { appendStartupHeartbeat } from "../shared/logging.js";
 import { TOOLS, makeHandlers } from "./tools.js";
+import { classify } from "../shared/errors.js";
 
 appendStartupHeartbeat("openai");
 
@@ -23,7 +24,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
   const handler = HANDLERS[name];
   if (!handler) {
-    return { content: [{ type: "text", text: JSON.stringify({ ok: false, error: `unknown tool '${name}'` }) }], isError: true };
+    const text = JSON.stringify(classify("openai", new Error(`unknown tool '${name}'`)).toToolResponse());
+    return { content: [{ type: "text", text }], isError: true };
   }
   try {
     const text = await handler(args ?? {});
@@ -31,7 +33,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     process.stderr.write(`openai-mcp: handler '${name}' threw: ${msg}\n`);
-    return { content: [{ type: "text", text: JSON.stringify({ ok: false, error: msg }) }], isError: true };
+    const text = JSON.stringify(classify("openai", err).toToolResponse());
+    return { content: [{ type: "text", text }], isError: true };
   }
 });
 
