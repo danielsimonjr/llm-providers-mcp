@@ -43,8 +43,9 @@ export async function runAgent(agent: Agent, prompt: string): Promise<[string, R
       total_tokens: raw.totalTokens ?? raw.total_tokens,
       requests: raw.requests,
     };
-    // reasoning_tokens and cached_tokens come from detail arrays in Usage class
-    // (not present in the serialized Zod schema — check best-effort)
+    // Port-faithful with the Python original (output_tokens_details.reasoning_tokens,
+    // input_tokens_details.cached_tokens). @openai/agents@0.1.11 does not currently
+    // expose these in its usage schema, so these branches are forward-compat / best-effort.
     const reasoningDetails = raw.outputTokensDetails;
     if (Array.isArray(reasoningDetails)) {
       const reasoning = reasoningDetails.reduce((sum: number, d: Record<string, number>) =>
@@ -64,6 +65,8 @@ export async function runAgent(agent: Agent, prompt: string): Promise<[string, R
   } catch {
     usage = {};
   }
-  const text: string = typeof result.finalOutput === "string" ? result.finalOutput : (result.finalOutput ?? "");
-  return [String(text), usage];
+  // finalOutput is a string for text-output agents (the default); fall back to
+  // "" for any nullish or non-string output rather than stringifying an object.
+  const text = typeof result.finalOutput === "string" ? result.finalOutput : "";
+  return [text, usage];
 }
