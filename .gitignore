@@ -14,3 +14,6 @@ build/
 .remember/
 .claude/settings.local.json
 
+# Node / TypeScript build artifacts
+node_modules/
+
