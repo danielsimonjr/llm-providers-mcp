@@ -32,7 +32,9 @@ jobs:
         run: npm ci
       - name: Type check
         run: npm run typecheck
+      - name: Build
+        # Build before tests: the index-errors/smoke tests spawn the compiled
+        # dist/<provider>/index.js entrypoints as child processes.
+        run: npm run build
       - name: Run tests
         run: npm test
-      - name: Build
-        run: npm run build
