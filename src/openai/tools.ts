@@ -6,6 +6,7 @@ import {
   buildReasoningAgent as realReasoning,
   buildGeneralistAgent as realGeneralist,
   runAgent as realRunAgent,
+  reasoningFallbackModel,
 } from "./agents.js";
 
 export const TOOLS: Tool[] = [
@@ -68,9 +69,50 @@ export function makeHandlers(deps?: Deps): Record<string, Handler> {
     }
   }
 
+  /**
+   * Run `primaryAgent`; if it 429s (rate_limit OR insufficient_quota) and a
+   * DISTINCT fallback model is available, retry once on the fallback (built via
+   * `buildFb`). On any other error — or if the fallback also fails — return the
+   * (clearer) error. The fallback shares the account credit pool, so a truly
+   * exhausted balance still surfaces as insufficient_quota from both.
+   */
+  async function viaAgentWithFallback(
+    primaryAgent: any,
+    input: string,
+    buildFb: () => any,
+  ): Promise<string> {
+    try {
+      const [text, usage] = await runAgent(primaryAgent, input);
+      return JSON.stringify(ok(text, { provider: "openai", model: primaryAgent.model, usage }));
+    } catch (err) {
+      const pe = classify("openai", err);
+      if (pe.kind !== "rate_limit" && pe.kind !== "insufficient_quota") {
+        return JSON.stringify(pe.toToolResponse());
+      }
+      const fb = buildFb();
+      if (!fb || fb.model === primaryAgent.model) {
+        return JSON.stringify(pe.toToolResponse()); // no distinct fallback to try
+      }
+      try {
+        const [text, usage] = await runAgent(fb, input);
+        return JSON.stringify(
+          ok(text, {
+            provider: "openai",
+            model: fb.model,
+            usage: { ...usage, fallback_from: primaryAgent.model },
+          }),
+        );
+      } catch (err2) {
+        return JSON.stringify(classify("openai", err2).toToolResponse());
+      }
+    }
+  }
+
   return {
     openai_quick_query: (args: { prompt: string }) => viaAgent(buildQuick(), args.prompt),
-    openai_reasoning_query: (args: { prompt: string }) => viaAgent(buildReasoning(), args.prompt),
-    openai_agent_run: (args: { task: string }) => viaAgent(buildGeneralist(), args.task),
+    openai_reasoning_query: (args: { prompt: string }) =>
+      viaAgentWithFallback(buildReasoning(), args.prompt, () => buildReasoning(reasoningFallbackModel())),
+    openai_agent_run: (args: { task: string }) =>
+      viaAgentWithFallback(buildGeneralist(), args.task, () => buildGeneralist(reasoningFallbackModel())),
   };
 }

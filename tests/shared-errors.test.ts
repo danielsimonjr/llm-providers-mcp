@@ -3,6 +3,10 @@ import { ProviderError, classify } from "../src/shared/errors.js";
 
 describe("classify", () => {
   const cases: [string, string][] = [
+    // insufficient_quota (billing) is checked BEFORE rate_limit even though the
+    // OpenAI quota 429 also contains "429" — it is a distinct, non-transient kind.
+    ["429 You exceeded your current quota, please check your plan and billing details", "insufficient_quota"],
+    ["Error: insufficient_quota", "insufficient_quota"],
     ["Rate limit exceeded", "rate_limit"],
     ["429 Too Many Requests", "rate_limit"],
     ["Unauthorized", "auth"],

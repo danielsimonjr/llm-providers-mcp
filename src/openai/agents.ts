@@ -9,18 +9,34 @@ export function buildQuickAgent(): Agent {
   });
 }
 
-export function buildReasoningAgent(): Agent {
+/** Default reasoning model (overridable via OPENAI_REASONING_MODEL). */
+export function reasoningModel(): string {
+  return envOr("OPENAI_REASONING_MODEL", "o3-mini");
+}
+
+/**
+ * Fallback reasoning model used when the primary 429s (rate-limit OR
+ * insufficient-quota). o4-mini has far higher rate limits and is cheaper, so it
+ * keeps reasoning available when the primary (e.g. o3) is throttled or tier-gated.
+ * It shares the account credit pool, so it cannot rescue a fully-exhausted
+ * balance — that needs billing. Overridable via OPENAI_REASONING_FALLBACK_MODEL.
+ */
+export function reasoningFallbackModel(): string {
+  return envOr("OPENAI_REASONING_FALLBACK_MODEL", "o4-mini");
+}
+
+export function buildReasoningAgent(model: string = reasoningModel()): Agent {
   return new Agent({
     name: "OpenAI Reasoning",
-    model: envOr("OPENAI_REASONING_MODEL", "o3-mini"),
+    model,
     instructions: "You are a careful reasoner. Think step by step when the problem demands it. Prefer correctness over speed.",
   });
 }
 
-export function buildGeneralistAgent(): Agent {
+export function buildGeneralistAgent(model: string = reasoningModel()): Agent {
   return new Agent({
     name: "OpenAI Generalist",
-    model: envOr("OPENAI_REASONING_MODEL", "o3-mini"),
+    model,
     instructions:
       "You are an autonomous worker. You will receive a task from another agent (Claude). " +
       "Complete the task end-to-end. If the task is ambiguous, note your assumptions and proceed. " +

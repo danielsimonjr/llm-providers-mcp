@@ -57,3 +57,56 @@ describe("openai handlers", () => {
     });
   });
 });
+
+describe("openai reasoning fallback (o3 → o4-mini)", () => {
+  // A model-tagged reasoning builder: buildReasoning() → primary 'o3';
+  // buildReasoning('o4-mini') → the fallback. runAgent 429s the primary.
+  const reasoningBuilder = (model?: string) => ({ name: "R", model: model ?? "o3" } as any);
+
+  it("falls back to o4-mini when the primary hits insufficient_quota", async () => {
+    const seen: string[] = [];
+    const runAgent = vi.fn(async (agent: any) => {
+      seen.push(agent.model);
+      if (agent.model === "o3") {
+        throw new Error("429 You exceeded your current quota, please check your plan and billing details");
+      }
+      return ["fallback-answer", { input_tokens: 2 }] as [string, Record<string, unknown>];
+    });
+    const handlers = makeHandlers({ runAgent, buildReasoningAgent: reasoningBuilder });
+    const out = JSON.parse(await handlers.openai_reasoning_query({ prompt: "p" }));
+    expect(seen).toEqual(["o3", "o4-mini"]); // tried primary, then fallback
+    expect(out).toMatchObject({ ok: true, model: "o4-mini", data: "fallback-answer" });
+    expect(out.usage.fallback_from).toBe("o3");
+  });
+
+  it("also falls back on a transient rate_limit", async () => {
+    const seen: string[] = [];
+    const runAgent = vi.fn(async (agent: any) => {
+      seen.push(agent.model);
+      if (agent.model === "o3") throw new Error("Rate limit reached, try again");
+      return ["ok", {}] as [string, Record<string, unknown>];
+    });
+    const handlers = makeHandlers({ runAgent, buildReasoningAgent: reasoningBuilder });
+    const out = JSON.parse(await handlers.openai_reasoning_query({ prompt: "p" }));
+    expect(seen).toEqual(["o3", "o4-mini"]);
+    expect(out).toMatchObject({ ok: true, model: "o4-mini" });
+  });
+
+  it("surfaces insufficient_quota when the fallback ALSO 429s (account-wide)", async () => {
+    const runAgent = vi.fn(async () => {
+      throw new Error("429 You exceeded your current quota, please check your plan and billing details");
+    });
+    const handlers = makeHandlers({ runAgent, buildReasoningAgent: reasoningBuilder });
+    const out = JSON.parse(await handlers.openai_reasoning_query({ prompt: "p" }));
+    expect(runAgent).toHaveBeenCalledTimes(2); // primary + fallback both tried
+    expect(out).toMatchObject({ ok: false, error: { kind: "insufficient_quota" } });
+  });
+
+  it("does NOT fall back on a non-429 error (e.g. auth)", async () => {
+    const runAgent = vi.fn(async () => { throw new Error("401 Unauthorized"); });
+    const handlers = makeHandlers({ runAgent, buildReasoningAgent: reasoningBuilder });
+    const out = JSON.parse(await handlers.openai_reasoning_query({ prompt: "p" }));
+    expect(runAgent).toHaveBeenCalledTimes(1); // no fallback attempt
+    expect(out).toMatchObject({ ok: false, error: { kind: "auth" } });
+  });
+});

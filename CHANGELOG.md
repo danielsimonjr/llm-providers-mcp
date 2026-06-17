@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **OpenAI reasoning fallback (o3 → o4-mini).** `openai_reasoning_query` and
+  `openai_agent_run` now retry once on a cheaper, higher-rate-limit fallback model
+  when the primary reasoning model returns a 429 (rate-limit OR insufficient-quota).
+  The fallback model is `OPENAI_REASONING_FALLBACK_MODEL` (default `o4-mini`); the
+  response's `usage.fallback_from` records the primary model when a fallback was
+  used. Keeps reasoning available when o3 is throttled or tier-gated; a
+  fully-exhausted account credit pool still surfaces `insufficient_quota` from both.
+- New `insufficient_quota` `ErrorKind`, classified BEFORE `rate_limit` (OpenAI's
+  quota 429 also contains "429"). It is a billing condition — not a transient
+  throttle — so it is labelled distinctly (retries/backoff can't clear it).
+
 ## [2.0.0] - 2026-05-30
 
 ### Changed
