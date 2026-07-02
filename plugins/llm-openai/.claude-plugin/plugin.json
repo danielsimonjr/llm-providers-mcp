@@ -1,0 +1,5 @@
+{
+  "name": "llm-openai",
+  "version": "2.0.0",
+  "description": "OpenAI reasoning/quick/agent query tools (Eve)."
+}

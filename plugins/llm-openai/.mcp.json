@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "llm-openai": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/bundle/index.mjs"
+      ],
+      "env": {
+        "OPENAI_REASONING_MODEL": "o3",
+        "_RETRY": "2026-06-17-o4mini-fallback"
+      }
+    }
+  }
+}
