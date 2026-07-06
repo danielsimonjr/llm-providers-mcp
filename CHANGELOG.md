@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`llm-gemini:gemini`, `/gemini`) skills consolidating the
   askOpenAI/askOpenAIPro and askGemini/askGeminiPro commands; commands
   unchanged. Both sub-plugins bumped to 2.1.0.
+- **Fast-follow:** the `openai` and `gemini` skills now reference the
+  plugin-prefixed tool names (`mcp__plugin_llm-openai_llm-openai__*`,
+  `mcp__plugin_llm-gemini_llm-gemini__*`) plus a `ToolSearch` bootstrap
+  line for fetching schemas when a tool isn't loaded, and drop the old
+  askOpenAI/askOpenAIPro and askGemini/askGeminiPro command-name routing
+  hints in favor of naming the routing condition directly. Both
+  sub-plugins bumped to 2.1.1.
 - **OpenAI reasoning fallback (o3 → o4-mini).** `openai_reasoning_query` and
   `openai_agent_run` now retry once on a cheaper, higher-rate-limit fallback model
   when the primary reasoning model returns a 429 (rate-limit OR insufficient-quota).

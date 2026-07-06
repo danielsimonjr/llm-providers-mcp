@@ -5,11 +5,13 @@ description: "Ask Google Gemini via the llm-gemini MCP server (codename Adam). U
 
 # Gemini
 
-A playbook for routing questions to Google Gemini through the `llm-gemini` MCP server (codename Adam). This skill adds no tools of its own — every action below is one of the server's existing MCP tools. Its job is to help you pick the right model for the question and report the answer back consistently.
+A playbook for routing questions to Google Gemini through the `llm-gemini` MCP server (codename Adam). This skill adds no tools of its own — every action below is one of the server's existing MCP tools, called with the plugin-prefixed name `mcp__plugin_llm-gemini_llm-gemini__<tool>`. Its job is to help you pick the right model for the question and report the answer back consistently.
 
 **Skill root**: this skill ships inside the `llm-gemini` sub-plugin of `llm-providers-mcp` (`plugins/llm-gemini/skills/gemini/`). Slash trigger: `/gemini`.
 
 ## Which tool
+
+The three tools are called with their fully-qualified names: `mcp__plugin_llm-gemini_llm-gemini__gemini_quick_query`, `mcp__plugin_llm-gemini_llm-gemini__gemini_reasoning_query`, and `mcp__plugin_llm-gemini_llm-gemini__gemini_multimodal_query` (bare names used below for brevity). If a tool isn't loaded, fetch its schema via `ToolSearch select:mcp__plugin_llm-gemini_llm-gemini__gemini_quick_query` (swap in the tool name you need).
 
 | Tool | Model | Use for |
 |---|---|---|
@@ -17,7 +19,7 @@ A playbook for routing questions to Google Gemini through the `llm-gemini` MCP s
 | `gemini_reasoning_query` | gemini-2.5-pro | Multi-step reasoning, complex analysis, or when you want a careful second opinion distinct from Claude's. Slower and more expensive — reach for it when the question needs it, not by default. |
 | `gemini_multimodal_query` | (accepts images) | Screenshot analysis, diagram interpretation, OCR, frontend review from a mockup — anything with image input. |
 
-Default to `gemini_quick_query` unless the question is the kind that would make you reach for `askGeminiPro` over `askGemini` — multi-step reasoning, complex analysis, or a careful second opinion.
+Default to `gemini_quick_query` unless the question needs multi-step reasoning, complex analysis, or a careful second opinion distinct from Claude's.
 
 ## How to answer
 

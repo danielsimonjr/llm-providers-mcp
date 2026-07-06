@@ -5,11 +5,13 @@ description: "Ask OpenAI via the llm-openai MCP server (codename Eve). Use when 
 
 # OpenAI
 
-A playbook for routing questions to OpenAI through the `llm-openai` MCP server (codename Eve). This skill adds no tools of its own — every action below is one of the server's existing MCP tools. Its job is to help you pick the right model for the question and report the answer back consistently.
+A playbook for routing questions to OpenAI through the `llm-openai` MCP server (codename Eve). This skill adds no tools of its own — every action below is one of the server's existing MCP tools, called with the plugin-prefixed name `mcp__plugin_llm-openai_llm-openai__<tool>`. Its job is to help you pick the right model for the question and report the answer back consistently.
 
 **Skill root**: this skill ships inside the `llm-openai` sub-plugin of `llm-providers-mcp` (`plugins/llm-openai/skills/openai/`). Slash trigger: `/openai`.
 
 ## Which tool
+
+The three tools are called with their fully-qualified names: `mcp__plugin_llm-openai_llm-openai__openai_quick_query`, `mcp__plugin_llm-openai_llm-openai__openai_reasoning_query`, and `mcp__plugin_llm-openai_llm-openai__openai_agent_run` (bare names used below for brevity). If a tool isn't loaded, fetch its schema via `ToolSearch select:mcp__plugin_llm-openai_llm-openai__openai_quick_query` (swap in the tool name you need).
 
 | Tool | Model | Use for |
 |---|---|---|
@@ -17,7 +19,7 @@ A playbook for routing questions to OpenAI through the `llm-openai` MCP server (
 | `openai_reasoning_query` | o3-mini | Architecture questions, hard bugs, formal reasoning, step-by-step decomposition. Slower and more expensive — reach for it when the question actually needs multi-step reasoning, not by default. |
 | `openai_agent_run` | agentic run | Hand off an end-to-end task you want OpenAI to work autonomously, rather than a single question/answer exchange. More expensive than either query tool — reserve for work that genuinely needs autonomy. |
 
-Default to `openai_quick_query` unless the question is the kind that would make you reach for `askOpenAIPro` over `askOpenAI` — architecture, a hard bug, formal reasoning, or a problem that needs to be decomposed step by step.
+Default to `openai_quick_query` unless the question needs the reasoning model — architecture questions, hard bugs, formal reasoning, or a problem that needs to be decomposed step by step.
 
 ## How to answer
 
