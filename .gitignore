@@ -17,3 +17,6 @@ build/
 # Node / TypeScript build artifacts
 node_modules/
 
+
+# SDD scratch/ledger
+.superpowers/
