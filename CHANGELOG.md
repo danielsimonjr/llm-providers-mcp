@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Companion `openai` (`llm-openai:openai`, `/openai`) and `gemini`
+  (`llm-gemini:gemini`, `/gemini`) skills consolidating the
+  askOpenAI/askOpenAIPro and askGemini/askGeminiPro commands; commands
+  unchanged. Both sub-plugins bumped to 2.1.0.
 - **OpenAI reasoning fallback (o3 → o4-mini).** `openai_reasoning_query` and
   `openai_agent_run` now retry once on a cheaper, higher-rate-limit fallback model
   when the primary reasoning model returns a 429 (rate-limit OR insufficient-quota).

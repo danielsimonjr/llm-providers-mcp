@@ -11,6 +11,13 @@ No third-party plugin, no telemetry, no postinstall scripts. Every line is
 yours to audit. Built against the MCP TypeScript SDK and the official provider
 SDKs (`@openai/agents`, `@google/genai`).
 
+## Skills
+
+`llm-openai` also ships an `openai` skill (`llm-openai:openai`, `/openai`) and
+`llm-gemini` ships a `gemini` skill (`llm-gemini:gemini`, `/gemini`) —
+playbooks over the quick/reasoning query tools; see the respective
+`plugins/*/skills/*/SKILL.md`.
+
 ## Tools exposed
 
 | Server | Tool | Intent |
