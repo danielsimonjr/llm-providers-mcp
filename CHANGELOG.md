@@ -53,7 +53,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Python implementation (`servers/`, `shared/`, `pyproject.toml`, `uv.lock`).
 
-## [Unreleased]
+## [Pre-2.0.0 — Python era] - 2026-05-07
+
+> These entries predate the 2.0.0 TypeScript rewrite (2026-05-30), which
+> removed the Python implementation they describe. Preserved here for history.
 
 ### Added
 
