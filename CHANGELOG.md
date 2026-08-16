@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-08-16)
+
+- **Both servers reported themselves as `2.0.0` while shipping as `2.1.1`.** The version lived
+  in **four** places — `package.json`, each plugin's `plugin.json`, and a string literal in each
+  entry point — with nothing comparing them. The manifests moved to 2.1.1 and everything else
+  stayed behind. `serverInfo.version` is the field used to prove a deploy landed, so while it
+  disagreed with the manifest a stale deploy and a healthy one were indistinguishable.
+  `package.json` is now the single source (bumped to **2.1.1**) and the version is injected at
+  build time via `src/shared/version.ts`. One shared module, not one declaration per entry,
+  because two entries writing the same constant is the shape that caused the drift.
+- **`tests/version-consistency.test.ts` pins it.** Asserts each `plugin.json` equals
+  `package.json` and that neither entry contains a hardcoded semver in its `Server()`
+  constructor. Mutation-proven: drifting one manifest to 2.1.0 failed the gate by name;
+  restoring returned 5 passed.
+
+### Added (2026-08-16)
+
+- **`scripts/bundle.mjs` — the shipped artifacts are reproducible again.** Both
+  `plugins/*/bundle/index.mjs` were committed with **no build script and no bundler
+  dependency**, so a source fix could land while the plugins kept serving whatever was
+  committed, and no gate would notice because the tests run against `src/`. Rebuilding was a
+  prerequisite for fixing the version at all. Flags recovered from the shipped artifacts rather
+  than guessed: the `__commonJS`/`__toESM` helpers name esbuild, the line-2 `createRequire`
+  banner names the format and shim, the line-1 shebang names each entry as a bin. The banner
+  deliberately emits **no** shebang — both entries already have one, and a second is a syntax
+  error on line 2.
+  - Verified by **executing** both rebuilt bundles over MCP stdio: `gemini-mcp 2.1.1` and
+    `openai-mcp 2.1.1`, three tools each. 67 tests pass.
+
 ### Security (2026-08-04)
 
 Lock-only via `npm update`; no manifest changed. Transitive dependencies of the

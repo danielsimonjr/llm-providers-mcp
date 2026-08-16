@@ -6,6 +6,7 @@ import { requireEnv } from "../shared/secrets.js";
 import { appendStartupHeartbeat } from "../shared/logging.js";
 import { TOOLS, makeHandlers } from "./tools.js";
 import { classify } from "../shared/errors.js";
+import { VERSION } from "../shared/version.js";
 
 appendStartupHeartbeat("openai");
 
@@ -14,7 +15,7 @@ requireEnv("OPENAI_API_KEY", "Get one from https://platform.openai.com/api-keys 
 const HANDLERS = makeHandlers();
 
 const server = new Server(
-  { name: "openai-mcp", version: "2.0.0" },
+  { name: "openai-mcp", version: VERSION },
   { capabilities: { tools: {} } },
 );
 

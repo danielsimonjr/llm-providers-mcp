@@ -6,6 +6,7 @@ import { requireEnv } from "../shared/secrets.js";
 import { appendStartupHeartbeat } from "../shared/logging.js";
 import { TOOLS, makeHandlers } from "./tools.js";
 import { classify } from "../shared/errors.js";
+import { VERSION } from "../shared/version.js";
 
 appendStartupHeartbeat("gemini");
 
@@ -14,7 +15,7 @@ requireEnv("GEMINI_API_KEY", "Get one from https://aistudio.google.com/apikey an
 const HANDLERS = makeHandlers();
 
 const server = new Server(
-  { name: "gemini-mcp", version: "2.0.0" },
+  { name: "gemini-mcp", version: VERSION },
   { capabilities: { tools: {} } },
 );
 
