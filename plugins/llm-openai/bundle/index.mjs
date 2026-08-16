@@ -38109,7 +38109,7 @@ function makeHandlers(deps) {
 }
 
 // src/shared/version.ts
-var VERSION2 = true ? "2.1.1" : "0.0.0-dev";
+var VERSION2 = true ? "2.1.2" : "0.0.0-dev";
 
 // src/openai/index.ts
 appendStartupHeartbeat("openai");

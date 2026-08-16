@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.1.2] - 2026-08-16
 
 ### Fixed (2026-08-16)
 
@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   entry point — with nothing comparing them. The manifests moved to 2.1.1 and everything else
   stayed behind. `serverInfo.version` is the field used to prove a deploy landed, so while it
   disagreed with the manifest a stale deploy and a healthy one were indistinguishable.
-  `package.json` is now the single source (bumped to **2.1.1**) and the version is injected at
+  `package.json` is now the single source (bumped to **2.1.2**) and the version is injected at
   build time via `src/shared/version.ts`. One shared module, not one declaration per entry,
   because two entries writing the same constant is the shape that caused the drift.
 - **`tests/version-consistency.test.ts` pins it.** Asserts each `plugin.json` equals
@@ -33,8 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   banner names the format and shim, the line-1 shebang names each entry as a bin. The banner
   deliberately emits **no** shebang — both entries already have one, and a second is a syntax
   error on line 2.
-  - Verified by **executing** both rebuilt bundles over MCP stdio: `gemini-mcp 2.1.1` and
-    `openai-mcp 2.1.1`, three tools each. 67 tests pass.
+  - Verified by **executing** both rebuilt bundles over MCP stdio: `gemini-mcp 2.1.2` and
+    `openai-mcp 2.1.2`, three tools each. 67 tests pass.
 
 ### Security (2026-08-04)
 

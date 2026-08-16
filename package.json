@@ -1,6 +1,6 @@
 {
   "name": "llm-providers-mcp",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Local MCP servers wrapping OpenAI and Google Gemini (TypeScript).",
   "type": "module",
   "main": "dist/gemini/index.js",
