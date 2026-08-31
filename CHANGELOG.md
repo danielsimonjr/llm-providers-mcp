@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **MCP 2026-07-28 (informally "MCP 2.0") support.** Upgraded from
+  `@modelcontextprotocol/sdk` v1.x to `@modelcontextprotocol/server` v2.x and
+  `@modelcontextprotocol/core` v2.x. Both servers now start via `serveStdio`, which
+  negotiates the protocol era per connection: legacy clients using the `initialize`
+  handshake continue to work, and modern clients using the per-request `_meta` envelope
+  (protocol revision `2026-07-28`) are served statelessly as required by the new spec.
+  Shared tool-server wiring lives in `src/shared/mcp-server.ts`.
+- **Tests cover both protocol eras.** `tests/smoke.test.ts` exercises `tools/list`
+  over legacy `initialize` and over a modern opening message with the required
+  `io.modelcontextprotocol/*` envelope keys.
+
 ## [2.1.2] - 2026-08-16
 
 ### Fixed (2026-08-16)

@@ -1,4 +1,4 @@
-import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import type { Tool } from "@modelcontextprotocol/server";
 import { readFileSync } from "node:fs";
 import { envOr } from "../shared/secrets.js";
 import { ok } from "../shared/formatting.js";
