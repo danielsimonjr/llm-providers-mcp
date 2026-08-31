@@ -17,7 +17,8 @@
   },
   "dependencies": {
     "@google/genai": "^1.0.0",
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/core": "^2.0.0",
+    "@modelcontextprotocol/server": "^2.0.0",
     "@openai/agents": "^0.1.0"
   },
   "devDependencies": {

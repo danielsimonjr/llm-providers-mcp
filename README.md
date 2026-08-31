@@ -8,8 +8,9 @@ through each provider's own official Agent SDK.
 [![Node: >=24](https://img.shields.io/badge/node-%3E%3D24-blue.svg)](package.json)
 
 No third-party plugin, no telemetry, no postinstall scripts. Every line is
-yours to audit. Built against the MCP TypeScript SDK and the official provider
-SDKs (`@openai/agents`, `@google/genai`).
+yours to audit. Built against the MCP TypeScript SDK v2 (`@modelcontextprotocol/server`,
+protocol revision **2026-07-28** with legacy `initialize` fallback) and the official
+provider SDKs (`@openai/agents`, `@google/genai`).
 
 ## Skills
 
