@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TypeScript-on-Bun toolchain.** Development and CI now use Bun end-to-end:
+  `bun install`, `bun test` (`bun:test` replaces Vitest), `bun run typecheck` /
+  `build` / `bundle`. `engines.bun` is `>=1.4.0`. Shipped MCP servers and Claude
+  Code plugin launches remain on **Node** (`command: node`, smoke tests spawn
+  `node dist/...`) — Bun is the TypeScript package manager, script driver, and
+  test runner, not the long-lived stdio runtime.
+- Docs (`README`, `CONTRIBUTING`, `docs/architecture`) updated off the stale
+  npm/Python wording to match the TypeScript layout under `src/`.
 - **MCP 2026-07-28 (informally "MCP 2.0") support.** Upgraded from
   `@modelcontextprotocol/sdk` v1.x to `@modelcontextprotocol/server` v2.x and
   `@modelcontextprotocol/core` v2.x. Both servers now start via `serveStdio`, which

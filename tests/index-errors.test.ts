@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import {
   exchange,
   legacyToolsListSequence,
@@ -27,7 +27,7 @@ describe("index unknown-tool error shape", () => {
     expect(parsed.ok).toBe(false);
     expect(parsed.error).toMatchObject({ provider: "gemini", kind: "unknown", retry_after_seconds: null });
     expect(typeof parsed.error.message).toBe("string");
-  }, 20000);
+  }, { timeout: 20000 });
 
   it("openai returns the contract error shape for an unknown tool", async () => {
     const child = spawnServer("openai", { OPENAI_API_KEY: "dummy" });
@@ -38,5 +38,5 @@ describe("index unknown-tool error shape", () => {
     expect(parsed.ok).toBe(false);
     expect(parsed.error).toMatchObject({ provider: "openai", kind: "unknown", retry_after_seconds: null });
     expect(typeof parsed.error.message).toBe("string");
-  }, 20000);
+  }, { timeout: 20000 });
 });

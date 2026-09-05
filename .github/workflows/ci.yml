@@ -1,6 +1,6 @@
-# Runs typecheck + vitest + build on Linux and Windows across Node 20/22.
-# (Migrated from the previous Python/ruff/pytest pipeline — the package is
-# now TypeScript/Node since v2.0.0.)
+# TypeScript-on-Bun toolchain: bun install, bun test, tsc.
+# Shipped MCP plugin bundles still launch under Node (Claude Code `command: node`),
+# so smoke tests spawn `node dist/...` after the build step.
 
 name: CI
 
@@ -15,30 +15,37 @@ permissions:
 
 jobs:
   test:
-    name: test (${{ matrix.os }}, Node ${{ matrix.node-version }})
+    name: test (${{ matrix.os }}, Bun ${{ matrix.bun-version }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node-version: ['20.x', '22.x']
+        bun-version: ['1.4.0']
     steps:
       - uses: actions/checkout@v4
+
+      # Node remains available so smoke/index-errors can spawn the production
+      # launcher (`node dist/<provider>/index.js`) that Claude Code plugins use.
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '24.x'
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: '1.4.0'
+          bun-version: ${{ matrix.bun-version }}
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
       - name: Type check
         run: bun run typecheck
+
       - name: Build
         # Build before tests: the index-errors/smoke tests spawn the compiled
-        # dist/<provider>/index.js entrypoints as child processes.
+        # dist/<provider>/index.js entrypoints as child processes under Node.
         run: bun run build
+
       - name: Run tests
         run: bun run test

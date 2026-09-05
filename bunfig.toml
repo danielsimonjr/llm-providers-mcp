@@ -1,0 +1,3 @@
+[test]
+# Only *.test.ts under tests/ — helpers like mcp-protocol.ts stay out of the suite.
+root = "./tests"

@@ -5,12 +5,17 @@ through each provider's own official Agent SDK.
 
 [![CI](https://github.com/danielsimonjr/llm-providers-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/danielsimonjr/llm-providers-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Bun: >=1.4](https://img.shields.io/badge/bun-%3E%3D1.4-fbf0df.svg)](package.json)
 [![Node: >=24](https://img.shields.io/badge/node-%3E%3D24-blue.svg)](package.json)
 
 No third-party plugin, no telemetry, no postinstall scripts. Every line is
 yours to audit. Built against the MCP TypeScript SDK v2 (`@modelcontextprotocol/server`,
 protocol revision **2026-07-28** with legacy `initialize` fallback) and the official
 provider SDKs (`@openai/agents`, `@google/genai`).
+
+**Toolchain:** TypeScript on Bun (`bun install`, `bun test`, `bun run build`).
+**Shipped runtime:** Node — Claude Code plugins launch the bundled servers with
+`node` (long-lived MCP stdio processes stay on Node by design).
 
 ## Skills
 
@@ -32,13 +37,14 @@ playbooks over the quick/reasoning query tools; see the respective
 
 ## Install
 
-Requires Node >=24.
+Requires [Bun](https://bun.sh) >=1.4 (toolchain) and Node >=24 (to run the
+compiled servers / Claude Code plugins).
 
 ```bash
 git clone https://github.com/danielsimonjr/llm-providers-mcp.git
 cd llm-providers-mcp
-npm install
-npm run build
+bun install
+bun run build
 ```
 
 ## Configure keys
@@ -91,15 +97,16 @@ Before registering with Claude Code, you can drive each server through the
 MCP Inspector browser UI:
 
 ```bash
-npx @modelcontextprotocol/inspector node dist/gemini/index.js
+bunx @modelcontextprotocol/inspector node dist/gemini/index.js
 ```
 
 ## Development
 
 ```bash
-npm test          # vitest unit + smoke tests (no network)
-npm run typecheck
-npm run build
+bun test          # bun:test unit + smoke tests (no network)
+bun run typecheck
+bun run build
+bun run bundle    # rebuild plugins/*/bundle/index.mjs
 ```
 
 ## How to add a provider

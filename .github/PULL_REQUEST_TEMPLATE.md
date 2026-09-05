@@ -14,15 +14,15 @@ Closes #
 
 ## How I tested
 
-- [ ] `pytest -m "not integration"` passes locally
-- [ ] `ruff check .` passes
-- [ ] `ruff format --check .` passes
-- [ ] (If the change touches a server) Verified via MCP Inspector: `npx @modelcontextprotocol/inspector ./.venv/Scripts/python.exe -m servers.<name>.server`
-- [ ] (If the change touches `shared/secrets.py`, `shared/errors.py`, or any key-loading path) Re-read SECURITY.md's four-rule contract and confirmed this PR doesn't violate any
+- [ ] `bun test` passes locally
+- [ ] `bun run typecheck` passes
+- [ ] `bun run build` passes
+- [ ] (If the change touches a server) Verified via MCP Inspector: `bunx @modelcontextprotocol/inspector node dist/<provider>/index.js`
+- [ ] (If the change touches `src/shared/secrets.ts`, `src/shared/errors.ts`, or any key-loading path) Re-read SECURITY.md's four-rule contract and confirmed this PR doesn't violate any
 
 ## Breaking changes
 
-<!-- If yes, describe migration path. Bump the version in pyproject.toml
+<!-- If yes, describe migration path. Bump the version in package.json
      accordingly and note it in CHANGELOG.md. -->
 
 ## Notes for reviewers

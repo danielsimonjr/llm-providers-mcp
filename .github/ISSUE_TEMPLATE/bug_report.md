@@ -16,16 +16,16 @@ labels: bug
 ```
 claude mcp list
 # or:
-<python -c "..."> output
+bun test
 ```
 
 ## Environment
 
 - OS:
-- Python version (`python --version`):
-- `uv --version` (if used):
+- Bun version (`bun --version`):
+- Node version (`node --version`):
 - `claude --version`:
-- Provider SDK versions (`pip show openai-agents google-genai`):
+- Package versions (`bun pm ls @openai/agents @google/genai @modelcontextprotocol/server`):
 
 ## Output / stack trace
 

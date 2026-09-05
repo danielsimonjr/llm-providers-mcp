@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, mock } from "bun:test";
 import { makeHandlers, TOOLS } from "../src/gemini/tools.js";
 
 describe("gemini TOOLS defs", () => {
@@ -17,7 +17,7 @@ describe("gemini TOOLS defs", () => {
 
 describe("gemini handlers", () => {
   it("quick_query calls generate with Flash + budget 0 + temp 0.2 + concise prompt", async () => {
-    const generate = vi.fn(async () => ["hi", { input_tokens: 1 }] as [string, Record<string, unknown>]);
+    const generate = mock(async () => ["hi", { input_tokens: 1 }] as [string, Record<string, unknown>]);
     const handlers = makeHandlers({ generate });
     const out = JSON.parse(await handlers.gemini_quick_query({ prompt: "p" }));
     expect(generate).toHaveBeenCalledWith("p", {
@@ -31,7 +31,7 @@ describe("gemini handlers", () => {
   });
 
   it("reasoning_query calls generate with Pro + budget 8192 + maxOut 32768", async () => {
-    const generate = vi.fn(async () => ["r", {}] as [string, Record<string, unknown>]);
+    const generate = mock(async () => ["r", {}] as [string, Record<string, unknown>]);
     const handlers = makeHandlers({ generate });
     await handlers.gemini_reasoning_query({ prompt: "q" });
     expect(generate).toHaveBeenCalledWith("q", {
@@ -44,7 +44,7 @@ describe("gemini handlers", () => {
   });
 
   it("maps provider errors to the error response shape", async () => {
-    const generate = vi.fn(async () => { throw new Error("429 Too Many Requests"); });
+    const generate = mock(async () => { throw new Error("429 Too Many Requests"); });
     const handlers = makeHandlers({ generate });
     const out = JSON.parse(await handlers.gemini_quick_query({ prompt: "p" }));
     expect(out).toEqual({

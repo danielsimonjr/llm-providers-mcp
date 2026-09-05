@@ -5,58 +5,60 @@ Thanks for your interest. This project follows the
 
 ## Development setup
 
+Requires [Bun](https://bun.sh) >=1.4 and Node >=24 (smoke tests and Claude Code
+plugins launch compiled servers with `node`).
+
 ```bash
 git clone https://github.com/danielsimonjr/llm-providers-mcp.git
 cd llm-providers-mcp
-uv venv --python 3.13
-source .venv/Scripts/activate
-uv pip install -e ".[openai,gemini,dev]"
+bun install
+bun run build
 ```
 
 ## Running tests
 
 ```bash
-pytest                       # unit tests only, no network
-pytest -m integration        # integration tests (needs keys, costs money)
-ruff check .
-ruff format --check .
+bun test                 # unit + smoke (no network)
+bun run typecheck
+bun run build
 ```
 
-The CI runs `pytest -m "not integration"` and both ruff commands on Linux
-and Windows across Python 3.10–3.13.
+CI runs `bun run typecheck`, `bun run build`, and `bun test` on Linux and
+Windows with Bun 1.4.x. Smoke/`index-errors` spawn `node dist/<provider>/index.js`
+so the production launcher stays covered.
 
 ## Style
 
-- `ruff` with the defaults in `pyproject.toml` — the CI will reject PRs that
-  don't pass `ruff check .`.
-- Four-space indent, double-quoted strings, trailing commas in multi-line
-  collections.
-- Type hints encouraged but not enforced. `from __future__ import annotations`
-  at the top of every module so forward references work without cost.
+- TypeScript strict mode (`tsc --noEmit` / `bun run typecheck`).
+- Two-space indent, double-quoted strings, trailing commas in multi-line
+  literals where the surrounding file already uses them.
+- Prefer explicit types at module boundaries; lean on inference inside
+  functions.
 
 ## Adding a new provider server
 
-See [`servers/README.md`](servers/README.md). The short version:
+See [`docs/architecture.md`](docs/architecture.md). The short version:
 
-1. Create `servers/<provider>_mcp/` with `server.py` and any client helper.
+1. Create `src/<provider>/` with an `index.ts` entry and any client helper
+   (`tools.ts`, `client.ts` / `agents.ts`).
 2. Expose three tool categories mirroring the existing servers:
    `_quick_query`, `_reasoning_query`, and a third tool that plays to the
    provider's strength (agent loop, multimodal, function calling, etc.).
-3. Use `shared.secrets.require_env` for the provider's key (fail fast at
-   import, not at first tool call).
-4. Use `shared.errors.classify` for exception handling.
-5. Use `shared.formatting.ok` for success responses so the JSON shape stays
+3. Use `shared/secrets.requireEnv` for the provider's key (fail fast at
+   startup, not at first tool call).
+4. Use `shared/errors.classify` for exception handling.
+5. Use `shared/formatting.ok` for success responses so the JSON shape stays
    uniform across providers.
-6. Add a console-script entry in `pyproject.toml`.
-7. Add an optional-extras group in `pyproject.toml` so the provider's SDK
-   only installs when requested.
-8. Update README and CHANGELOG.
+6. Wire the entry through `shared/mcp-server.startStdioMcpServer`.
+7. Add `bin` entries in `package.json` if you ship a new CLI name.
+8. Update README and CHANGELOG; keep each `plugins/*/…/plugin.json` version
+   equal to `package.json` (enforced by `tests/version-consistency.test.ts`).
 
 ## Security-sensitive PRs
 
-Any PR that touches `shared/secrets.py`, `shared/errors.py`, or the key-loading
-path in either server needs a second set of eyes on the four rules in
-[`SECURITY.md`](SECURITY.md#key-handling-contract). Please call this out in
+Any PR that touches `src/shared/secrets.ts`, `src/shared/errors.ts`, or the
+key-loading path in either server needs a second set of eyes on the four rules
+in [`SECURITY.md`](SECURITY.md#key-handling-contract). Please call this out in
 the PR description so reviewers know to look.
 
 ## Commit messages

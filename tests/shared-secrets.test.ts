@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach } from "bun:test";
 import { requireEnv, envOr, redact, MissingCredentialError } from "../src/shared/secrets.js";
 
 const KEY = "TEST_VAR_LLM_MCP";

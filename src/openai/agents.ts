@@ -44,8 +44,12 @@ export function buildGeneralistAgent(model: string = reasoningModel()): Agent {
   });
 }
 
-export async function runAgent(agent: Agent, prompt: string): Promise<[string, Record<string, unknown>]> {
-  const result: any = await run(agent, prompt);
+export async function runAgent(
+  agent: Agent,
+  prompt: string,
+  runFn: typeof run = run,
+): Promise<[string, Record<string, unknown>]> {
+  const result: any = await runFn(agent, prompt);
   let usage: Record<string, unknown> = {};
   try {
     // Usage lives at result.state.context.usage with camelCase fields

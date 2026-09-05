@@ -12,14 +12,14 @@
  * the first place.
  */
 
-// MUST be declared at module scope. Inside a function this is TS1184, which vitest's
+// MUST be declared at module scope. Inside a function this is TS1184, which bun's
 // per-file transpile does not catch and `tsc` does.
 declare const __PKG_VERSION__: string;
 
 /**
  * The injected version, or a clearly-fake fallback.
  *
- * `tsc` (`npm run build`) does not apply esbuild's `define`, so the fallback keeps a direct
+ * `tsc` (`bun run build`) does not apply esbuild's `define`, so the fallback keeps a direct
  * `node dist/...` run working. It is deliberately `0.0.0-dev` rather than a plausible number:
  * a wrong-but-believable version is what this module exists to prevent.
  */
