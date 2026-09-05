@@ -1,7 +1,7 @@
 {
   "name": "llm-providers-mcp",
   "version": "2.1.3",
-  "description": "Local MCP servers wrapping OpenAI and Google Gemini (TypeScript).",
+  "description": "Local MCP servers wrapping OpenAI and Google Gemini (TypeScript on Bun).",
   "type": "module",
   "main": "dist/gemini/index.js",
   "bin": {
@@ -11,9 +11,9 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "bundle": "node scripts/bundle.mjs"
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "bundle": "bun scripts/bundle.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.0.0",
@@ -22,12 +22,13 @@
     "@openai/agents": "^0.1.0"
   },
   "devDependencies": {
+    "@types/bun": "^1.3.0",
     "@types/node": "^24.0.0",
     "esbuild": "^0.28.2",
-    "typescript": "^5.6.0",
-    "vitest": "^4.0.0"
+    "typescript": "^5.6.0"
   },
   "engines": {
+    "bun": ">=1.4.0",
     "node": ">=24"
   }
 }

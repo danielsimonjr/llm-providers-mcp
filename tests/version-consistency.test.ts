@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -18,8 +18,8 @@ import { join } from "node:path";
  * pins the manifests to the same source so the drift cannot reappear silently.
  */
 
-const ROOT = join(__dirname, "..");
-const PLUGINS = ["llm-gemini", "llm-openai"];
+const ROOT = join(import.meta.dir, "..");
+const PLUGINS = ["llm-gemini", "llm-openai"] as const;
 
 function readJson(...parts: string[]): Record<string, unknown> {
   return JSON.parse(readFileSync(join(ROOT, ...parts), "utf8"));
@@ -32,20 +32,24 @@ describe("version consistency", () => {
     expect(pkgVersion).toMatch(/^\d+\.\d+\.\d+/);
   });
 
-  it.each(PLUGINS)("%s/plugin.json matches package.json", (plugin) => {
-    const manifest = readJson("plugins", plugin, ".claude-plugin", "plugin.json");
-    expect(manifest.version).toBe(pkgVersion);
-  });
+  for (const plugin of PLUGINS) {
+    it(`${plugin}/plugin.json matches package.json`, () => {
+      const manifest = readJson("plugins", plugin, ".claude-plugin", "plugin.json");
+      expect(manifest.version).toBe(pkgVersion);
+    });
+  }
 
   // The literals are what actually drifted, so their absence is asserted rather than assumed.
-  it.each([
+  for (const [name, rel] of [
     ["gemini", "src/gemini/index.ts"],
     ["openai", "src/openai/index.ts"],
-  ])("%s entry takes its version from the shared module, not a literal", (_name, rel) => {
-    const source = readFileSync(join(ROOT, rel), "utf8");
-    expect(source).toContain("version: VERSION");
-    expect(source).toMatch(/from "\.\.\/shared\/version\.js"/);
-    // A hardcoded semver in the Server() constructor is the exact defect being prevented.
-    expect(source).not.toMatch(/version:\s*["']\d+\.\d+\.\d+["']/);
-  });
+  ] as const) {
+    it(`${name} entry takes its version from the shared module, not a literal`, () => {
+      const source = readFileSync(join(ROOT, rel), "utf8");
+      expect(source).toContain("version: VERSION");
+      expect(source).toMatch(/from "\.\.\/shared\/version\.js"/);
+      // A hardcoded semver in the Server() constructor is the exact defect being prevented.
+      expect(source).not.toMatch(/version:\s*["']\d+\.\d+\.\d+["']/);
+    });
+  }
 });

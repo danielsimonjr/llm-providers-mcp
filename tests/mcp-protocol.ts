@@ -15,8 +15,12 @@ type JsonRpcMessage = {
   result?: { tools?: Array<{ name: string }>; content?: Array<{ text?: string }>; isError?: boolean };
 };
 
+/**
+ * Spawn a compiled server under Node — the same launcher Claude Code plugins use
+ * (`command: node`). The test runner itself is Bun; production MCP hosts still get Node.
+ */
 export function spawnServer(entry: string, env: Record<string, string>): ChildProcessWithoutNullStreams {
-  return spawn(process.execPath, [join(root, "dist", entry, "index.js")], {
+  return spawn("node", [join(root, "dist", entry, "index.js")], {
     env: { ...process.env, ...env },
     stdio: ["pipe", "pipe", "pipe"],
   });

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { ProviderError, classify } from "../src/shared/errors.js";
 
 describe("classify", () => {
@@ -18,11 +18,13 @@ describe("classify", () => {
     ["400 Bad Request", "invalid_request"],
     ["Some unknown weird glitch", "unknown"],
   ];
-  it.each(cases)("classifies %s -> %s", (message, kind) => {
-    const err = classify("test-provider", new Error(message));
-    expect(err.kind).toBe(kind);
-    expect(err.provider).toBe("test-provider");
-  });
+  for (const [message, kind] of cases) {
+    it(`classifies ${JSON.stringify(message)} -> ${kind}`, () => {
+      const err = classify("test-provider", new Error(message));
+      expect(err.kind).toBe(kind);
+      expect(err.provider).toBe("test-provider");
+    });
+  }
 
   it("produces the tool-response shape", () => {
     const resp = classify("openai", new Error("Rate limit exceeded")).toToolResponse();

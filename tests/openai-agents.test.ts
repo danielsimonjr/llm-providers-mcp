@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach } from "bun:test";
 import { buildQuickAgent, buildReasoningAgent, buildGeneralistAgent } from "../src/openai/agents.js";
 
 afterEach(() => {
