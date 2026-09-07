@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TypeScript raised to `^7.0.2` and Bun pinned to 1.4.2.** Part of the fleet move to
+  the current releases of both. `packageManager`, `engines.bun` and the CI workflow
+  move together -- a version the manifest declares but CI does not install is a pin
+  that enforces nothing.
+
+### Changed
+
 - **TypeScript-on-Bun toolchain.** Development and CI now use Bun end-to-end:
   `bun install`, `bun test` (`bun:test` replaces Vitest), `bun run typecheck` /
   `build` / `bundle`. `engines.bun` is `>=1.4.0`. Shipped MCP servers and Claude

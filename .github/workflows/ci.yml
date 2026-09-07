@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        bun-version: ['1.4.0']
+        bun-version: ['1.4.2']
     steps:
       - uses: actions/checkout@v4
 
