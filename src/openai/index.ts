@@ -12,6 +12,7 @@ requireEnv("OPENAI_API_KEY", "Get one from https://platform.openai.com/api-keys 
 
 startStdioMcpServer({
   name: "openai-mcp",
+  provider: "openai",
   version: VERSION,
   tools: TOOLS,
   handlers: makeHandlers(),

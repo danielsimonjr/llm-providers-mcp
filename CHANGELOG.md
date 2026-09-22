@@ -7,15 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`tools/call` now enforces the argument contract each tool already declares.**
+  `buildToolServer` dispatched straight to the handler, so every tool's
+  `required` and `additionalProperties: false` were advertised to clients and
+  never checked. A caller that passed `query:` where the schema requires
+  `prompt:` therefore reached the vendored provider SDK with `undefined`, and the
+  SDK reported `originalInput is not iterable` -- its own vocabulary naming our
+  bug, which points a reader into a bundled dependency instead of at the call
+  site. Invalid calls are now refused with `kind: "invalid_request"` and a
+  message that names the offending argument and lists the accepted ones. A
+  misnamed argument makes both faults true at once (the required field is absent
+  AND an unrecognised one was supplied), so the message reports both -- naming
+  only one hides the half that tells the caller what to type.
+  The guard lives in the shared layer, so it covers **both** providers and every
+  tool added later; a per-tool patch in one provider would have left the same
+  hole everywhere else. Validation runs before any network call, so a malformed
+  call costs no tokens.
+
+### Added
+
+- `ToolServerConfig.provider` -- the provider name (`openai`, `gemini`) as it
+  appears in error responses, distinct from `name` (the *server* name,
+  `openai-mcp`). It was previously reachable only inside the `classify` closure,
+  so any error path that did not go through `classify` had no correct way to
+  spell it.
+
 ### Changed
 
 - **TypeScript raised to `^7.0.2` and Bun pinned to 1.4.2.** Part of the fleet move to
   the current releases of both. `packageManager`, `engines.bun` and the CI workflow
   move together -- a version the manifest declares but CI does not install is a pin
   that enforces nothing.
-
-### Changed
-
 - **TypeScript-on-Bun toolchain.** Development and CI now use Bun end-to-end:
   `bun install`, `bun test` (`bun:test` replaces Vitest), `bun run typecheck` /
   `build` / `bundle`. `engines.bun` is `>=1.4.0`. Shipped MCP servers and Claude

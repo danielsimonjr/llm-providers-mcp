@@ -1,10 +1,19 @@
 import { Server } from "@modelcontextprotocol/server";
 import type { Tool } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
-import type { ProviderError } from "./errors.js";
+import { ProviderError } from "./errors.js";
+import { validateArgs } from "./validate.js";
 
 export interface ToolServerConfig {
   name: string;
+  /**
+   * The PROVIDER name ("openai", "gemini") as it appears in every error
+   * response. Distinct from `name`, which is the SERVER name ("openai-mcp").
+   * Declared explicitly because the provider was previously reachable only
+   * inside the `classify` closure, so error paths that did not go through
+   * `classify` had no correct way to spell it.
+   */
+  provider: string;
   version: string;
   tools: Tool[];
   handlers: Record<string, (args: Record<string, unknown>) => Promise<string>>;
@@ -29,8 +38,25 @@ export function buildToolServer(config: ToolServerConfig): Server {
       );
       return { content: [{ type: "text", text }], isError: true };
     }
+    const callArgs = (args ?? {}) as Record<string, unknown>;
+
+    // Enforce the contract the tool already advertises. Without this the
+    // declared `required` / `additionalProperties` are documentation only, and a
+    // misnamed argument reaches the provider SDK as `undefined` — which then
+    // names OUR bug in ITS vocabulary. Refuse here, in our own words.
+    const tool = config.tools.find((t) => t.name === name);
+    if (tool) {
+      const problem = validateArgs(tool, callArgs);
+      if (problem) {
+        const text = JSON.stringify(
+          new ProviderError(config.provider, "invalid_request", problem).toToolResponse(),
+        );
+        return { content: [{ type: "text", text }], isError: true };
+      }
+    }
+
     try {
-      const text = await handler((args ?? {}) as Record<string, unknown>);
+      const text = await handler(callArgs);
       return { content: [{ type: "text", text }] };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);

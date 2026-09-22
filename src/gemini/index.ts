@@ -12,6 +12,7 @@ requireEnv("GEMINI_API_KEY", "Get one from https://aistudio.google.com/apikey an
 
 startStdioMcpServer({
   name: "gemini-mcp",
+  provider: "gemini",
   version: VERSION,
   tools: TOOLS,
   handlers: makeHandlers(),

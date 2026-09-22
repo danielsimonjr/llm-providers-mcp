@@ -1390,6 +1390,133 @@ var require_browser = __commonJS({
   }
 });
 
+// ../../node_modules/has-flag/index.js
+var require_has_flag = __commonJS({
+  "../../node_modules/has-flag/index.js"(exports, module) {
+    "use strict";
+    module.exports = (flag, argv = process.argv) => {
+      const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
+      const position = argv.indexOf(prefix + flag);
+      const terminatorPosition = argv.indexOf("--");
+      return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+    };
+  }
+});
+
+// ../../node_modules/supports-color/index.js
+var require_supports_color = __commonJS({
+  "../../node_modules/supports-color/index.js"(exports, module) {
+    "use strict";
+    var os = __require("os");
+    var tty = __require("tty");
+    var hasFlag = require_has_flag();
+    var { env } = process;
+    var flagForceColor;
+    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
+      flagForceColor = 0;
+    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
+      flagForceColor = 1;
+    }
+    function envForceColor() {
+      if ("FORCE_COLOR" in env) {
+        if (env.FORCE_COLOR === "true") {
+          return 1;
+        }
+        if (env.FORCE_COLOR === "false") {
+          return 0;
+        }
+        return env.FORCE_COLOR.length === 0 ? 1 : Math.min(Number.parseInt(env.FORCE_COLOR, 10), 3);
+      }
+    }
+    function translateLevel(level) {
+      if (level === 0) {
+        return false;
+      }
+      return {
+        level,
+        hasBasic: true,
+        has256: level >= 2,
+        has16m: level >= 3
+      };
+    }
+    function supportsColor(haveStream, { streamIsTTY, sniffFlags = true } = {}) {
+      const noFlagForceColor = envForceColor();
+      if (noFlagForceColor !== void 0) {
+        flagForceColor = noFlagForceColor;
+      }
+      const forceColor = sniffFlags ? flagForceColor : noFlagForceColor;
+      if (forceColor === 0) {
+        return 0;
+      }
+      if (sniffFlags) {
+        if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
+          return 3;
+        }
+        if (hasFlag("color=256")) {
+          return 2;
+        }
+      }
+      if (haveStream && !streamIsTTY && forceColor === void 0) {
+        return 0;
+      }
+      const min = forceColor || 0;
+      if (env.TERM === "dumb") {
+        return min;
+      }
+      if (process.platform === "win32") {
+        const osRelease = os.release().split(".");
+        if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
+          return Number(osRelease[2]) >= 14931 ? 3 : 2;
+        }
+        return 1;
+      }
+      if ("CI" in env) {
+        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE", "DRONE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
+          return 1;
+        }
+        return min;
+      }
+      if ("TEAMCITY_VERSION" in env) {
+        return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+      }
+      if (env.COLORTERM === "truecolor") {
+        return 3;
+      }
+      if ("TERM_PROGRAM" in env) {
+        const version2 = Number.parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+        switch (env.TERM_PROGRAM) {
+          case "iTerm.app":
+            return version2 >= 3 ? 3 : 2;
+          case "Apple_Terminal":
+            return 2;
+        }
+      }
+      if (/-256(color)?$/i.test(env.TERM)) {
+        return 2;
+      }
+      if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+        return 1;
+      }
+      if ("COLORTERM" in env) {
+        return 1;
+      }
+      return min;
+    }
+    function getSupportLevel(stream, options = {}) {
+      const level = supportsColor(stream, {
+        streamIsTTY: stream && stream.isTTY,
+        ...options
+      });
+      return translateLevel(level);
+    }
+    module.exports = {
+      supportsColor: getSupportLevel,
+      stdout: getSupportLevel({ isTTY: tty.isatty(1) }),
+      stderr: getSupportLevel({ isTTY: tty.isatty(2) })
+    };
+  }
+});
+
 // node_modules/debug/src/node.js
 var require_node = __commonJS({
   "node_modules/debug/src/node.js"(exports, module) {
@@ -1408,7 +1535,7 @@ var require_node = __commonJS({
     );
     exports.colors = [6, 2, 3, 4, 5, 1];
     try {
-      const supportsColor = __require("supports-color");
+      const supportsColor = require_supports_color();
       if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
         exports.colors = [
           20,
@@ -40378,7 +40505,7 @@ function makeHandlers(deps) {
 }
 
 // src/shared/version.ts
-var VERSION2 = true ? "2.1.3" : "0.0.0-dev";
+var VERSION2 = true ? "2.2.0" : "0.0.0-dev";
 
 // node_modules/@modelcontextprotocol/server/dist/chunk-Br0eD_fh.mjs
 var __create2 = Object.create;
@@ -61640,6 +61767,32 @@ function toError(value) {
   return value instanceof Error ? value : new Error(String(value));
 }
 
+// src/shared/validate.ts
+function validateArgs(tool, args) {
+  const schema = tool.inputSchema;
+  if (!schema?.properties) return null;
+  const where = (name) => `${tool.name}: '${name}'`;
+  const accepted = Object.keys(schema.properties);
+  const acceptedList = `accepted arguments are: ${accepted.join(", ")}`;
+  const unknown2 = schema.additionalProperties === false ? Object.keys(args).find((name) => !accepted.includes(name)) : void 0;
+  const missing = (schema.required ?? []).find((name) => args[name] === void 0);
+  if (missing && unknown2) {
+    return `${where(missing)} is required and was not supplied (received unknown argument '${unknown2}'; ${acceptedList})`;
+  }
+  if (missing) return `${where(missing)} is required and was not supplied`;
+  if (unknown2) return `${tool.name}: unknown argument '${unknown2}'; ${acceptedList}`;
+  for (const [name, spec] of Object.entries(schema.properties)) {
+    const value = args[name];
+    if (value === void 0) continue;
+    const actual = Array.isArray(value) ? "array" : typeof value;
+    const expected = spec.type;
+    if (expected && actual !== expected) {
+      return `${where(name)} must be ${expected === "array" ? "an" : "a"} ${expected}, received ${actual}`;
+    }
+  }
+  return null;
+}
+
 // src/shared/mcp-server.ts
 function buildToolServer(config2) {
   const server = new Server(
@@ -61656,8 +61809,19 @@ function buildToolServer(config2) {
       );
       return { content: [{ type: "text", text }], isError: true };
     }
+    const callArgs = args ?? {};
+    const tool = config2.tools.find((t2) => t2.name === name);
+    if (tool) {
+      const problem = validateArgs(tool, callArgs);
+      if (problem) {
+        const text = JSON.stringify(
+          new ProviderError(config2.provider, "invalid_request", problem).toToolResponse()
+        );
+        return { content: [{ type: "text", text }], isError: true };
+      }
+    }
     try {
-      const text = await handler(args ?? {});
+      const text = await handler(callArgs);
       return { content: [{ type: "text", text }] };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -61680,6 +61844,7 @@ appendStartupHeartbeat("gemini");
 requireEnv("GEMINI_API_KEY", "Get one from https://aistudio.google.com/apikey and set it.");
 startStdioMcpServer({
   name: "gemini-mcp",
+  provider: "gemini",
   version: VERSION2,
   tools: TOOLS,
   handlers: makeHandlers(),

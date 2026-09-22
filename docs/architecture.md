@@ -91,6 +91,7 @@ the SDK usage. This boundary:
 
 | Failure | Where it's caught | How it surfaces |
 |---|---|---|
+| Malformed `tools/call` arguments (missing, misnamed, or wrong-typed) | `validateArgs()` in `shared/mcp-server.ts`, BEFORE the handler runs | `{ok: false, error: {kind: "invalid_request", ...}}` naming the argument and listing the accepted ones — no network call is made |
 | Missing API key | `requireEnv()` at startup (in `index.ts`) | `MissingCredentialError` → process exits immediately with a clear message |
 | SDK raises rate-limit error mid-call | `try/catch` in the tool handler | `{ok: false, error: {kind: "rate_limit", ...}}` |
 | Network timeout | Same | `{ok: false, error: {kind: "timeout", ...}}` |
@@ -104,6 +105,12 @@ rules this architecture is built around. The module layout above is chosen
 specifically to make those rules easy to audit:
 
 - Only `src/shared/secrets.ts` reads environment credentials.
-- Only `shared/errors.classify` builds the error string that reaches the user.
+- Only `shared/errors.classify` builds the error string that reaches the user
+  **from a provider exception**. There is exactly one other construction site:
+  `validateArgs()` refuses a malformed call before the handler runs. It is safe
+  by construction because it composes its message from the tool name, the
+  declared argument names and `typeof` **only — never from an argument's
+  value**. Argument values may carry arbitrary caller context, so echoing one
+  back would turn an error path into a disclosure path.
 - Every tools/call handler ends with either `ok(...)` or `.toToolResponse()` —
   grep for those to enumerate every place a response leaves our process.
