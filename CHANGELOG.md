@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-09-22
+
+> Also carries **2.1.3** (bundle rebuild from a clean tree, 2026-08-22), which shipped
+> without a section of its own.
+
 ### Fixed
 
 - **`tools/call` now enforces the argument contract each tool already declares.**
